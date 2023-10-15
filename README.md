@@ -1,38 +1,119 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+<h1>❓ Website Purpose</h1>
+<p>🥻 Online merch and designer clothes shop</p>
+<img src="https://github.com/AlexaBailey/merch-shop/assets/93386868/7e8f428d-c041-4d8b-b56c-fbccbfcf3214"/>
 
-## Getting Started
+<h1>🛠️Technology Stack</h1>
+<p>React, NextJS, Nodejs, jsonwebtoken, Javascript, Typescript, MySQL2</p>
+<h1>🛢️ Database used</h1>
+<ul>
+<li>MySql</li>
+<li>Amazon Web Services</li>
+</ul>
+<h1>Special Features</h1>
+<p>Shopping Cart and Order system, Authentication and Department Segregation</p>
+<img src="https://github.com/AlexaBailey/merch-shop/assets/93386868/717855ed-9598-40f6-b24a-b61dbe912b42"/>
 
-First, run the development server:
+# Next.js + MySQL
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+This is a [Next.js](https://nextjs.org/) project that uses [Prisma](https://www.prisma.io/) to connect to a [PlanetScale](https://planetscale.com/) MySQL database and [Tailwind CSS](https://tailwindcss.com/) for styling.
+
+## Demo
+
+https://next-mysql.vercel.app
+
+## Prerequisites
+
+- [Node.js](https://nodejs.org/en/download/)
+- [PlanetScale CLI](https://github.com/planetscale/cli)
+- Authenticate the CLI with the following command:
+
+```sh
+pscale auth login
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Set up the database
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+Create a new database with the following command:
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+```sh
+pscale database create <DATABASE_NAME>
+```
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+> A branch, `main`, was automatically created when you created your database, so you can use that for `BRANCH_NAME` in the steps below.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## Set up the starter Next.js app
 
-## Learn More
+Execute [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) with [npm](https://docs.npmjs.com/cli/init), [Yarn](https://yarnpkg.com/lang/en/docs/cli/create/), or [pnpm](https://pnpm.io) to bootstrap the example:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npx create-next-app --example with-mysql nextjs-mysql
+# or
+yarn create next-app --example with-mysql nextjs-mysql
+# or
+pnpm create next-app --example with-mysql nextjs-mysql
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Next, you'll need to create a database username and password through the CLI to connect to your application. If you'd prefer to use the dashboard for this step, you can find those instructions in the [Connection Strings documentation](https://docs.planetscale.com/concepts/connection-strings#creating-a-password) and then come back here to finish setup.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+First, create your `.env` file by renaming the `.env.example` file to `.env`:
 
-## Deploy on Vercel
+```sh
+mv .env.example .env
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Next, using the PlanetScale CLI, create a new username and password for the branch of your database:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+```sh
+pscale password create <DATABASE_NAME> <BRANCH_NAME> <PASSWORD_NAME>
+```
+
+> The `PASSWORD_NAME` value represents the name of the username and password being generated. You can have multiple credentials for a branch, so this gives you a way to categorize them. To manage your passwords in the dashboard, go to your database overview page, click "Settings", and then click "Passwords".
+
+Take note of the values returned to you, as you won't be able to see this password again.
+
+```text
+Password production-password was successfully created.
+Please save the values below as they will not be shown again
+
+  NAME                  USERNAME       ACCESS HOST URL                     ROLE               PLAIN TEXT
+ --------------------- -------------- ----------------------------------- ------------------ -------------------------------------------------------
+  production-password   xxxxxxxxxxxxx   xxxxxx.us-east-2.psdb.cloud   Can Read & Write   pscale_pw_xxxxxxx
+```
+
+You'll use these properties to construct your connection string, which will be the value for `DATABASE_URL` in your `.env` file. Update the `DATABASE_URL` property with your connection string in the following format:
+
+```text
+mysql://<USERNAME>:<PLAIN_TEXT_PASSWORD>@<ACCESS_HOST_URL>/<DATABASE_NAME>?sslaccept=strict
+```
+
+Push the database schema to your PlanetScale database using Prisma.
+
+`npx prisma db push`
+
+Run the seed script to populate your database with `Product` and `Category` data.
+
+`npm run seed`
+
+## Run the App
+
+Run the app with following command:
+
+`npm run dev`
+
+Open your browser at [localhost:3000](localhost:3000) to see the running application.
+
+## Deploy your own
+
+After you've got your application running locally, it's time to deploy it. To do so, you'll need to promote your database branch (`main` by default) to be the production branch ([read the branching documentation for more information](https://docs.planetscale.com/concepts/branching)).
+
+```sh
+pscale branch promote <DATABASE_NAME> <BRANCH_NAME>
+```
+
+Now that your branch has been promoted to production, you can either use the existing password you generated earlier for running locally or create a new password. Regardless, you'll need a password in the deployment steps below.
+
+Deploy the example using [Vercel](https://vercel.com?utm_source=github&utm_medium=readme&utm_campaign=next-example):
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/git/external?repository-url=https://github.com/vercel/next.js/tree/canary/examples/with-mysql&project-name=with-mysql&repository-name=with-mysql&env=DATABASE_URL)
+
+> Make sure to update the `DATABASE_URL` variable during this setup process.
